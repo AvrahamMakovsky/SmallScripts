@@ -38,7 +38,7 @@ Command-line SSD health monitor (Python).
 #### How to use
 
 1. Install Python 3.
-2. Install `smartctl` (from smartmontools) and ensure itвЂ™s in your system PATH.
+2. Install `smartctl` (from smartmontools) and ensure it's in your system PATH.
 3. Run the script:
 
    ```bash
