@@ -105,6 +105,27 @@ Paste a list of hosts and launch RealVNC Viewer sessions for all of them.
 
 ---
 
+### `Set-Resolution.ps1`  
+PowerShell script to force screen resolution to 2048×1080 on systems that default to basic settings after OS install.
+
+#### What it does
+
+- Uses native Windows API (no third-party tools) to change display resolution.
+- Automatically sets the resolution to **2048×1080**, useful for aligning remote systems with your local display preferences.
+- Helps avoid the default **1024×768** resolution that often appears after clean installs.
+
+#### Use case
+
+- When remotely connecting to lab hosts or VMs after OS deployment, the display resolution is often suboptimal.
+- This script forces a consistent, higher resolution to improve usability across different machines and match your screen layout.
+
+#### How to use
+
+1. Right-click and run the script as **Administrator**, or launch it in a PowerShell terminal:
+   ```powershell
+   powershell -ExecutionPolicy Bypass -File Set-Resolution.ps1
+---
+
 ## Getting started
 
 1. Clone the repository:
