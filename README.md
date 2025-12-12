@@ -75,7 +75,7 @@ Hostname extractor for ticket titles or log text (Python).
 ---
 
 ### `BulkPingLauncher.bat`  
-Paste a list of hosts and open a continuous `ping -t` for each oneвЂ”either in **multiple tabs** (Windows Terminal) or separate CMD windows.
+Paste a list of hosts and open a continuous `ping -t` for each one вЂ” either in **multiple tabs** (Windows Terminal) or separate CMD windows.
 
 #### What it does
 
@@ -105,25 +105,52 @@ Paste a list of hosts and launch RealVNC Viewer sessions for all of them.
 
 ---
 
-### `Set-Resolution.ps1`  
-PowerShell script to force screen resolution to 2048×1080 on systems that default to basic settings after OS install.
+### `offlinehostnameupdate.ps1`  
+Offline hostname editor for an offline SSD workflow (Imaging + EFI + offline registry).
 
 #### What it does
 
-- Uses native Windows API (no third-party tools) to change display resolution.
-- Automatically sets the resolution to **2048×1080**, useful for aligning remote systems with your local display preferences.
-- Helps avoid the default **1024×768** resolution that often appears after clean installs.
+This script was created to simulate and reproduce, **offline**, the hostname and DNS configuration changes that normally happen **online** in a specific lab environment.  
+In that lab, target machines use hostnames with a suffix such as `_TA` and are paired to "host" systems.
 
-#### Use case
+After analyzing the original online scripts, I identified which files and registry locations are responsible for those changes and built this offline variant:
 
-- When remotely connecting to lab hosts or VMs after OS deployment, the display resolution is often suboptimal.
-- This script forces a consistent, higher resolution to improve usability across different machines and match your screen layout.
+- Edits `Imaging\host.txt` and `Imaging\hostfqdn.txt` on the offline SSD.
+- Mounts and updates `EFI\host.txt` on the ESP partition.
+- Loads the offline Windows `SYSTEM` and `SOFTWARE` hives and updates the relevant hostname and DNS-related registry entries.
+
+#### Behavior summary
+
+- **Registry only**: ALL-CAPS hostname + optional ALL-CAPS suffix (`_TA`, etc.).
+- `Imaging\host.txt` - bare `HOSTNAME` only (no suffix, no DNS).
+- `Imaging\hostfqdn.txt` - `HOSTNAME.FQDN-SUFFIX` (true FQDN, suffix from config).
+- `EFI\host.txt` - `HOSTNAME.FQDN-SUFFIX` (same as `Imaging\hostfqdn.txt`).
+
+Other implementation details:
+
+- EFI access: prefers already-mounted ESP on the same disk; otherwise uses `mountvol` to map (prefers `M:`).
+- Robust volume GUID matching, readiness wait, provider priming, and safe read/write.
+- Updates all ControlSets (`Tcpip`, `Tcpip6`, `ComputerName`).
+- Mirrors `SOFTWARE` ComputerName (with safe unload).
+- Shows `Imaging\pair.json` in the summary and then removes it.
+- Always unmounts what it mounted.
+
+#### Configuration
+
+The DNS suffix for the FQDN files is configured inside the script:
+
+```powershell
+$HostFqdnSuffixConfig = "iil.company.com"   # set to your desired suffix (without leading dot)
+```
 
 #### How to use
 
-1. Right-click and run the script as **Administrator**, or launch it in a PowerShell terminal:
-   ```powershell
-   powershell -ExecutionPolicy Bypass -File Set-Resolution.ps1
+1. Connect the target SSD (offline Windows installation) to your working machine.
+2. Run PowerShell **as Administrator**.
+3. Run the script and follow the on-screen flow to ensure the correct offline drive is selected.
+
+> Note: This is a **beta** tool. Use carefully and double-check that you are targeting the offline SSD, not the live OS.
+
 ---
 
 ## Getting started
@@ -135,7 +162,7 @@ PowerShell script to force screen resolution to 2048×1080 on systems that defau
    cd SmallScripts
    ```
 
-2. Run the relevant scripts using Python or double-click batch files as needed.
+2. Run the relevant scripts using Python or PowerShell as appropriate.
 
 ---
 
