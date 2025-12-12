@@ -1,0 +1,104 @@
+<#
+Rebuild Final Reminder - Fullscreen User Notification
+
+Purpose
+- This script was intended to notify users who were already notified verbally that their stations
+  have to undergo a rebuild - as a final on-screen reminder before the rebuild takes place.
+
+Behavior
+- Displays a fullscreen, topmost, borderless window with a large message.
+- User can click "Acknowledge" to close.
+- Closing always requires confirmation (button click, Alt+F4, etc.).
+
+Notes
+- Uses WinForms (no mshta/IE dependency).
+- Designed to be easy to run locally or via a software deployment tool.
+
+Author: Avraham Makovsky
+#>
+
+param(
+    [string]$Title = "Final Reminder - Station Rebuild",
+    [string]$Message = "Your station is scheduled for a rebuild.`r`n`r`nYou were already notified verbally.`r`nThis is the final reminder.`r`n`r`nPlease save your work and close applications now."
+)
+
+Add-Type -AssemblyName System.Windows.Forms
+Add-Type -AssemblyName System.Drawing
+
+# Main form
+$form = New-Object System.Windows.Forms.Form
+$form.Text = $Title
+$form.WindowState = 'Maximized'
+$form.FormBorderStyle = 'None'
+$form.TopMost = $true
+$form.StartPosition = 'CenterScreen'
+$form.BackColor = [System.Drawing.Color]::Black
+$form.KeyPreview = $true
+
+# Confirm close on any close attempt
+$form.add_FormClosing({
+    param($sender, $e)
+    $r = [System.Windows.Forms.MessageBox]::Show(
+        "Are you sure you want to close this reminder?",
+        "Confirm close",
+        [System.Windows.Forms.MessageBoxButtons]::YesNo,
+        [System.Windows.Forms.MessageBoxIcon]::Warning
+    )
+    if ($r -ne [System.Windows.Forms.DialogResult]::Yes) {
+        $e.Cancel = $true
+    }
+})
+
+# Layout panel
+$panel = New-Object System.Windows.Forms.TableLayoutPanel
+$panel.Dock = 'Fill'
+$panel.ColumnCount = 1
+$panel.RowCount = 3
+$panel.BackColor = $form.BackColor
+$panel.Padding = New-Object System.Windows.Forms.Padding(60)
+$panel.RowStyles.Add((New-Object System.Windows.Forms.RowStyle([System.Windows.Forms.SizeType]::Percent, 15)))
+$panel.RowStyles.Add((New-Object System.Windows.Forms.RowStyle([System.Windows.Forms.SizeType]::Percent, 65)))
+$panel.RowStyles.Add((New-Object System.Windows.Forms.RowStyle([System.Windows.Forms.SizeType]::Percent, 20)))
+
+# Title label
+$titleLabel = New-Object System.Windows.Forms.Label
+$titleLabel.Text = $Title
+$titleLabel.Dock = 'Fill'
+$titleLabel.TextAlign = 'MiddleCenter'
+$titleLabel.ForeColor = [System.Drawing.Color]::White
+$titleLabel.Font = New-Object System.Drawing.Font("Segoe UI", 44, [System.Drawing.FontStyle]::Bold)
+
+# Message label
+$msgLabel = New-Object System.Windows.Forms.Label
+$msgLabel.Text = $Message
+$msgLabel.Dock = 'Fill'
+$msgLabel.TextAlign = 'MiddleCenter'
+$msgLabel.ForeColor = [System.Drawing.Color]::White
+$msgLabel.Font = New-Object System.Drawing.Font("Segoe UI", 28, [System.Drawing.FontStyle]::Regular)
+
+# Button
+$btn = New-Object System.Windows.Forms.Button
+$btn.Text = "Acknowledge"
+$btn.Anchor = 'None'
+$btn.AutoSize = $true
+$btn.Padding = New-Object System.Windows.Forms.Padding(18,10,18,10)
+$btn.Font = New-Object System.Drawing.Font("Segoe UI", 22, [System.Drawing.FontStyle]::Bold)
+
+$btn.add_Click({
+    # Trigger the same confirmation path via Close()
+    $form.Close()
+})
+
+$panel.Controls.Add($titleLabel, 0, 0)
+$panel.Controls.Add($msgLabel,   0, 1)
+$panel.Controls.Add($btn,        0, 2)
+
+$form.Controls.Add($panel)
+
+# Optional: block common "escape" behavior by not binding Esc key to close.
+$form.add_KeyDown({
+    param($sender, $e)
+    # You can optionally prevent Alt+F4 here, but FormClosing confirmation already handles it.
+})
+
+[void]$form.ShowDialog()
