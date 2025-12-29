@@ -109,7 +109,7 @@ Paste a list of hosts and launch RealVNC Viewer sessions for all of them.
 
 ---
 
-### ipconfig release.bat
+### ipconfig_release.bat
 
 Remote network repair helper (Windows batch) - release/renew DHCP, reset Winsock, and reboot immediately.
 
@@ -131,11 +131,6 @@ This script schedules the reboot first, then issues the network commands as best
 
 1. Copy the `.bat` file to the remote host.
 2. Run it **as Administrator**.
-3. If the filename contains a space, run it with quotes:
-
-```bat
-".\ipconfig release.bat"
-```
 
 Note: `ipconfig /release` can temporarily drop the remote connection. That's expected.
 
