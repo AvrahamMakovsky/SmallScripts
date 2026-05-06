@@ -19,6 +19,10 @@ Over time I may add scripts in different languages, such as:
 
 ---
 
+## Related repositories
+
+- [KVM Auto Login Helper](https://github.com/AvrahamMakovsky/kvm-auto-login-helper) - Chrome MV3 helper for auto-filling repetitive local lab KVM logins.
+
 ## Scripts
 
 ### SSDHealthMonitor.py
